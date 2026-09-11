@@ -1,5 +1,5 @@
 
-const pedidoService = require('../services/pedido.service');
+const pedidoService = require('../services/pedido_service');
 
 const controladorPedidos = {
     

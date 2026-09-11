@@ -17,5 +17,5 @@ const server = http.createServer((req, res) => {    res.setHeader('Access-Contro
 });
 
 server.listen(PORT, () => {
-    console.log(` Servidor nativo corriendo en http://localhost:${PORT}`);
+    console.log(` Servidor nativo corriendo en http://localhost:${PORT}/api/pedidos`);
 });

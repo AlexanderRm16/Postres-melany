@@ -1,4 +1,4 @@
-const pedidoRepository = require('../repositories/pedido.repository');
+const pedidoRepository = require('../repositories/pedido_repository');
 
 const pedidoService = {
     

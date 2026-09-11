@@ -1,4 +1,4 @@
-const { controladorPedidos } = require('../controllers/pedido.controller');
+const { controladorPedidos } = require('../controllers/pedido_controller');
 
 const manejarRutasPedidos = (req, res) => {
 
