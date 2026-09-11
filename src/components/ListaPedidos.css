@@ -1,0 +1,22 @@
+.lista-productos-contenedor {
+  padding: 1.5rem 0;
+}
+
+.lista-titulo {
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 1.5rem;
+}
+
+.grilla-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.lista-vacia {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 2rem;
+}
