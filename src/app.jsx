@@ -1,122 +1,148 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { obtenerPostres, crearPedido } from './services/api_pedido';
+import TarjetaPostre from './components/TarjetaPostre';
+import FormularioAgendamiento from './components/FormularioAgendamiento';
+import listaPedidos from './components/listaPedidos';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [postres, setPostres] = useState([]);
+  const [carrito, setCarrito] = useState([]);
+  const [mensajeEstado, setMensajeEstado] = useState('');
+  const [cargando, setCargando] = useState(false);
+
+  // Cargar el catálogo de postres desde el servicio al montar el componente
+  useEffect(() => {
+    setCargando(true);
+    obtenerPostres()
+      .then((data) => {
+        setPostres(data);
+      })
+      .catch((error) => {
+        console.error('Error al cargar postres:', error);
+        setMensajeEstado('Ocurrió un error al cargar el catálogo de postres.');
+      })
+      .finally(() => {
+        setCargando(false);
+      });
+  }, []);
+
+  // Agregar un postre seleccionado al carrito
+  const agregarAlCarrito = (postre) => {
+    setCarrito((prevCarrito) => [...prevCarrito, postre]);
+  };
+
+  // Vaciar el carrito de compras
+  const limpiarCarrito = () => {
+    setCarrito([]);
+  };
+
+  // Manejar el envío del formulario de pedido hacia la API
+  const manejarEnvioPedido = async (datosCliente) => {
+    if (carrito.length === 0) {
+      setMensajeEstado('El carrito está vacío. Agrega al menos un postre.');
+      return;
+    }
+
+    setCargando(true);
+    setMensajeEstado('');
+
+    try {
+      const nuevoPedido = {
+        cliente: datosCliente,
+        items: carrito,
+        fecha: new Date().toISOString()
+      };
+
+      const respuesta = await crearPedido(nuevoPedido);
+      
+      if (respuesta) {
+        setMensajeEstado('¡Pedido realizado con éxito!');
+        setCarrito([]); // Limpiar el carrito tras completar el pedido
+      }
+    } catch (error) {
+      console.error('Error al procesar el pedido:', error);
+      setMensajeEstado('No se pudo procesar el pedido. Inténtalo de nuevo.');
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div className="app-container" style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <header style={{ textAline: 'center', marginBottom: '30px' }}>
+        <h1>Venta de Postres</h1>
+      </header>
+
+      {mensajeEstado && (
+        <div 
+          className="alerta" 
+          style={{ 
+            padding: '10px', 
+            marginBottom: '20px', 
+            backgroundColor: '#f8d7da', 
+            color: '#721c24', 
+            borderRadius: '4px' 
+          }}
         >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          {mensajeEstado}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {cargando && <p>Cargando información...</p>}
+
+      <main style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+        {/* Sección de Catálogo de Postres */}
+        <section className="catalogo-section">
+          <h2>Catálogo de Postres</h2>
+          <div 
+            className="grid-postres" 
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}
+          >
+            {postres.map((postre) => (
+              <TarjetaPostre
+                key={postre.id || postre.nombre}
+                postre={postre}
+                alAgregar={agregarAlCarrito}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Sección de Carrito y Formulario de Agendamiento */}
+        <section className="pedido-section">
+          <h2>Tu Pedido</h2>
+          
+          <div className="resumen-carrito" style={{ marginBottom: '20px' }}>
+            <h3>Carrito ({carrito.length} ítems)</h3>
+            {carrito.length === 0 ? (
+              <p>No has seleccionado postres.</p>
+            ) : (
+              <ul>
+                {carrito.map((item, index) => (
+                  <li key={index}>
+                    {item.nombre} - ${item.precio}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {carrito.length > 0 && (
+              <button onClick={limpiarCarrito} style={{ marginTop: '10px' }}>
+                Vaciar Carrito
+              </button>
+            )}
+          </div>
+
+          <hr />
+
+          <FormularioAgendamiento
+            carrito={carrito}
+            alEnviar={manejarEnvioPedido}
+            deshabilitado={cargando}
+          />
+        </section>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
